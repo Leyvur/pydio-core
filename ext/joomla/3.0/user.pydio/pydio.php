@@ -74,7 +74,8 @@ class plgUserPydio extends JPlugin
         $AJXP_GLUE_GLOBALS["secret"] = $this->secret;
         $AJXP_GLUE_GLOBALS["user"] = array();
         $AJXP_GLUE_GLOBALS["user"]['name']	= $joomlaUser['username'];
-        $AJXP_GLUE_GLOBALS["user"]['password']	= $joomlaUser['password'];
+        $AJXP_GLUE_GLOBALS["user"]['password']	= $joomlaUser['password_clear'];
+        $AJXP_GLUE_GLOBALS["user"]['roles']	= $joomlaUser['groups'];
         if($joomlaUser['usertype'] == "Super Administrator" || $joomlaUser['usertype'] == "Administrator" || $joomlaUser["isRoot"]
             || is_array($joomlaUser["groups"]) && in_array("8", $joomlaUser["groups"])){
             $AJXP_GLUE_GLOBALS["user"]['right'] = 'admin';
@@ -83,8 +84,7 @@ class plgUserPydio extends JPlugin
         }
         $AJXP_GLUE_GLOBALS["plugInAction"] = ($isnew?"addUser":"updateUser");
 
-
-           include($this->glueCode);
+        include($this->glueCode);
         return $AJXP_GLUE_GLOBALS["result"];
 
     }
@@ -114,7 +114,7 @@ class plgUserPydio extends JPlugin
         $AJXP_GLUE_GLOBALS["secret"] = $this->secret;
         $AJXP_GLUE_GLOBALS["userName"] = $joomlaUser['username'];
         $AJXP_GLUE_GLOBALS["plugInAction"] = "delUser";
-           include($this->glueCode);
+        include($this->glueCode);
 
         return true;
     }
@@ -134,8 +134,7 @@ class plgUserPydio extends JPlugin
         $success = false;
         if(!$this->glueCodeFound) return false;
 
-        $juser = JFactory::getUser();
-        $groups = JUserHelper::getUserGroups($juser->id);        
+        $groups = JUserHelper::getUserGroups(JUserHelper::getUserId($user["username"]));
 
         global $AJXP_GLUE_GLOBALS;
         $AJXP_GLUE_GLOBALS = array();
@@ -161,15 +160,14 @@ class plgUserPydio extends JPlugin
     {
         // Initialize variables
         $success = false;
-
         if(!$this->glueCodeFound) return false;
+        
         global $AJXP_GLUE_GLOBALS;
         $AJXP_GLUE_GLOBALS = array();
         $AJXP_GLUE_GLOBALS["secret"] = $this->secret;
         $AJXP_GLUE_GLOBALS["plugInAction"] = "logout";
-           include($this->glueCode);
-
+        include($this->glueCode);
+        new SessionSwitcher("previous", false, true);
         return $AJXP_GLUE_GLOBALS["result"];
     }
-
 }
